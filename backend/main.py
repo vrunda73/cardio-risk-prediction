@@ -7,46 +7,44 @@ from schemas.prediction_schema import PredictionRequest, PredictionResponse
 from services.prediction_service import prediction_service
 
 
-# ============================================================
-# FastAPI Application
-# ============================================================
-
 app = FastAPI(
     title="Cardio Risk Prediction API",
     description="FastAPI backend to predict cardiovascular disease risk from patient clinical features.",
     version="1.0.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
 )
 
 
 # ============================================================
-# CORS Configuration
+# CORS CONFIGURATION
 # ============================================================
 
-# Frontend URLs allowed to call this API
-allowed_origins = [
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "").strip()
+
+origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
 ]
 
-# Optional: allow additional origins from Render environment variable
-allowed_origins_env = os.getenv("ALLOWED_ORIGINS", "")
+# Add origins from Render environment variable if provided
+if allowed_origins_env and allowed_origins_env != "*":
+    for origin in allowed_origins_env.split(","):
+        origin = origin.strip()
+        if origin and origin not in origins:
+            origins.append(origin)
 
-if allowed_origins_env:
-    if allowed_origins_env.strip() == "*":
-        allowed_origins = ["*"]
-    else:
-        for origin in allowed_origins_env.split(","):
-            origin = origin.strip()
 
-            if origin and origin not in allowed_origins:
-                allowed_origins.append(origin)
+# Allow all origins if ALLOWED_ORIGINS=*
+if allowed_origins_env == "*":
+    origins = ["*"]
 
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allowed_origins,
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -54,63 +52,51 @@ app.add_middleware(
 
 
 # ============================================================
-# Health Check
+# HEALTH CHECK
 # ============================================================
 
 @app.get("/", tags=["Health Check"])
 async def root():
-    """
-    Health check endpoint to verify that the backend API is running.
-    """
     return {
         "message": "Cardio Risk Prediction API is running"
     }
 
 
 # ============================================================
-# Prediction Endpoint
+# PREDICTION
 # ============================================================
 
 @app.post(
     "/predict",
     response_model=PredictionResponse,
     status_code=status.HTTP_200_OK,
-    tags=["Prediction"]
+    tags=["Prediction"],
 )
 async def predict_cardio_risk(
     patient_data: PredictionRequest
 ):
-    """
-    Predict cardiovascular disease risk
-    based on patient clinical parameters.
-    """
-
     try:
         response = prediction_service.predict(patient_data)
-
         return response
 
-    except FileNotFoundError as fnf_err:
-
+    except FileNotFoundError as error:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Model artifact missing: {str(fnf_err)}"
+            detail=f"Model artifact missing: {str(error)}",
         )
 
-    except Exception as e:
-
+    except Exception as error:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Prediction error occurred: {str(e)}"
+            detail=f"Prediction error occurred: {str(error)}",
         )
 
 
 # ============================================================
-# Run Application
+# START SERVER
 # ============================================================
 
 if __name__ == "__main__":
-
     import uvicorn
 
     port = int(os.getenv("PORT", 8000))
@@ -119,5 +105,5 @@ if __name__ == "__main__":
         "main:app",
         host="0.0.0.0",
         port=port,
-        reload=False
+        reload=False,
     )
