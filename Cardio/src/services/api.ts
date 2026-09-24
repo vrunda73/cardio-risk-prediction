@@ -15,7 +15,7 @@ import type {
 // ─────────────────────────────────────────────────────────────────────────────
 // API Configuration
 // ─────────────────────────────────────────────────────────────────────────────
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'https://cardio-risk-prediction-qlox.onrender.com';
 const DEMO_MODE = import.meta.env.VITE_DEMO_MODE === 'true';
 
 // ─────────────────────────────────────────────────────────────────────────────
