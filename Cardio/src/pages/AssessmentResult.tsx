@@ -126,39 +126,33 @@ export default function AssessmentResult() {
             </p>
           </div>
 
-          <div
-            className="
-              flex
-              flex-col
-              sm:flex-row
-              gap-2
-              sm:gap-3
-              w-full
-              md:w-auto
-            "
-          >
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePrint}
-              leftIcon={<Download size={16} />}
-            >
-              Save / Print
-            </Button>
+          <div className="w-full md:w-auto flex gap-2 md:gap-3">
+  {/* Save / Print — 70% width on mobile */}
+  <Button
+    variant="outline"
+    size="sm"
+    onClick={handlePrint}
+    leftIcon={<Download size={16} />}
+    className="w-[70%] md:w-auto justify-center"
+  >
+    Save / Print
+  </Button>
 
-            <Link
-              to="/assessment"
-              className="w-full sm:w-auto"
-            >
-              <Button
-                variant="secondary"
-                size="sm"
-                leftIcon={<RefreshCw size={16} />}
-              >
-                Retake
-              </Button>
-            </Link>
-          </div>
+  {/* Retake — 30% width on mobile */}
+  <Link
+    to="/assessment"
+    className="w-[30%] md:w-auto"
+  >
+    <Button
+      variant="secondary"
+      size="sm"
+      leftIcon={<RefreshCw size={16} />}
+      className="w-full justify-center"
+    >
+      Retake
+    </Button>
+  </Link>
+</div>
         </div>
 
         {/* =========================================================
